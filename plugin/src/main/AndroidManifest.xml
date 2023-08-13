@@ -1,0 +1,6 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <application>
+        <meta-data android:name="com.github.shadowsocks.plugin.version"
+                   android:value="0.0.2"/>
+    </application>
+</manifest>

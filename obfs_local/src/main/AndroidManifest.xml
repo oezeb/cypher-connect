@@ -1,0 +1,24 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <application>
+        <provider android:name=".BinaryProvider"
+                android:exported="true"
+                android:directBootAware="true"
+                android:authorities="com.github.shadowsocks.obfs_local.BinaryProvider">
+            <intent-filter>
+                <action android:name="com.github.shadowsocks.plugin.ACTION_NATIVE_PLUGIN"/>
+            </intent-filter>
+            <intent-filter>
+                <action android:name="com.github.shadowsocks.plugin.ACTION_NATIVE_PLUGIN"/>
+                <data android:scheme="plugin"
+                    android:host="com.github.shadowsocks"
+                    android:pathPrefix="/obfs-local"/>
+            </intent-filter>
+            <meta-data android:name="com.github.shadowsocks.plugin.id"
+                    android:value="obfs-local"/>
+            <meta-data android:name="com.github.shadowsocks.plugin.default_config"
+                    android:value="obfs=http"/>
+            <meta-data android:name="com.github.shadowsocks.plugin.executable_path"
+                    android:value="libobfs-local.so"/>
+         </provider>
+    </application>
+</manifest>

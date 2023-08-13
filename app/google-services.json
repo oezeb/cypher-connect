@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "147389563730",
+    "project_id": "cypher-connect",
+    "storage_bucket": "cypher-connect.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:147389563730:android:bf26dd4ebd8ead7dcaf08b",
+        "android_client_info": {
+          "package_name": "com.github.oezeb.cypher_connect"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "147389563730-skmp1on66t7die24t6gh0piqr807u2af.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA0j3TJaBuoFeDPfzUX0lOPx4cq-x71rvY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "147389563730-skmp1on66t7die24t6gh0piqr807u2af.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
