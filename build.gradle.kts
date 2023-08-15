@@ -13,7 +13,6 @@ buildscript {
         val kotlinVersion = rootProject.extra["kotlinVersion"].toString()
         classpath(rootProject.extra["androidPlugin"].toString())
         classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:1.9.0")
-        classpath("com.google.android.gms:oss-licenses-plugin:0.10.6")
         classpath("com.google.firebase:firebase-crashlytics-gradle:2.9.2")
         classpath("com.google.gms:google-services:4.3.15")
         classpath("com.vanniktech:gradle-maven-publish-plugin:0.24.0")

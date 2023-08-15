@@ -1,10 +1,11 @@
 package com.github.oezeb.cypher_connect
 
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.RemoteException
 import android.widget.ImageButton
 import android.widget.TextView
+import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import androidx.preference.PreferenceDataStore
 import com.github.shadowsocks.Core
 import com.github.shadowsocks.aidl.IShadowsocksService
@@ -14,7 +15,12 @@ import com.github.shadowsocks.database.ProfileManager
 import com.github.shadowsocks.preference.DataStore
 import com.github.shadowsocks.preference.OnPreferenceDataStoreChangeListener
 import com.github.shadowsocks.utils.Key
+import com.google.android.gms.ads.AdRequest
+import com.google.android.gms.ads.AdSize
+import com.google.android.gms.ads.AdView
+import com.google.android.gms.ads.MobileAds
 import kotlin.concurrent.thread
+
 
 class MainActivity : AppCompatActivity(), ShadowsocksConnection.Callback,
     OnPreferenceDataStoreChangeListener {
@@ -49,6 +55,11 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Callback,
         }
         DataStore.publicStore.registerChangeListener(this)
         thread { syncProfiles() }
+
+        // Initialize the Mobile Ads SDK
+        MobileAds.initialize(this)
+        findViewById<AdView>(R.id.bannerAdView).apply { loadAd(AdRequest.Builder().build()) }
+        findViewById<AdView>(R.id.rectangleAdView).apply { loadAd(AdRequest.Builder().build()) }
     }
 
     private fun toggle() {

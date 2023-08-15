@@ -2,7 +2,6 @@ plugins {
     id("com.android.library")
     id("com.vanniktech.maven.publish")
     kotlin("android")
-    id("kotlin-parcelize")
 }
 
 setupCommon()

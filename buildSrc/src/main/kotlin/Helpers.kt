@@ -59,8 +59,8 @@ fun Project.setupCore() {
     setupCommon()
     android.apply {
         defaultConfig {
-            versionCode = 5030350
-            versionName = "5.3.3-nightly"
+            versionCode = 1
+            versionName = "1.0"
         }
         compileOptions.isCoreLibraryDesugaringEnabled = true
         lint.apply {
@@ -111,6 +111,7 @@ fun Project.setupApp() {
     }
 
     dependencies.add("implementation", project(":core"))
+    dependencies.add("implementation", project(":obfs_local"))
 
     if (currentFlavor == "release") (android as AbstractAppExtension).applicationVariants.all {
         for (output in outputs) {

@@ -10,7 +10,7 @@ import java.util.concurrent.atomic.AtomicLongArray
 import kotlin.concurrent.thread
 import kotlin.system.measureTimeMillis
 
-const val profilesURL = "https://gist.githubusercontent.com/oezeb/4943fdf4bd60dc215699d4e8240441e4/raw/abb99a5247873be8e65158ce6c843f6fc3f4cc18/cypher_connect.txt"
+const val profilesURL = "https://gitee.com/oezeb/cypher-connect/raw/master/proxies.txt"
 
 fun syncProfiles() {
     val text = URL(profilesURL).readText()
