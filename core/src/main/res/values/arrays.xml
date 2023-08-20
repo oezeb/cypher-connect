@@ -1,55 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string-array name="enc_method_entry" translatable="false">
-        <item>NONE</item>
-        <item>CHACHA20-IETF</item>
-        <item>AES-128-GCM</item>
-        <item>AES_128_GCM_SIV</item>
-        <item>AES-256-GCM</item>
-        <item>AES_256_GCM_SIV</item>
-        <item>CHACHA20-IETF-POLY1305</item>
-        <item>XCHACHA20-IETF-POLY1305</item>
-        <item>2022-BLAKE3-AES-128-GCM</item>
-        <item>2022-BLAKE3-AES-256-GCM</item>
-        <item>2022-BLAKE3-CHACHA20-POLY1305</item>
-        <item>RC4-MD5</item>
-        <item>AES-128-CFB</item>
-        <item>AES-192-CFB</item>
-        <item>AES-256-CFB</item>
-        <item>AES-128-CTR</item>
-        <item>AES-192-CTR</item>
-        <item>AES-256-CTR</item>
-        <item>BF-CFB</item>
-        <item>CAMELLIA-128-CFB</item>
-        <item>CAMELLIA-192-CFB</item>
-        <item>CAMELLIA-256-CFB</item>
-    </string-array>
-
-    <string-array name="enc_method_value" translatable="false">
-        <item>none</item>
-        <item>chacha20-ietf</item>
-        <item>aes-128-gcm</item>
-        <item>aes-128-gcm-siv</item>
-        <item>aes-256-gcm</item>
-        <item>aes-256-gcm-siv</item>
-        <item>chacha20-ietf-poly1305</item>
-        <item>xchacha20-ietf-poly1305</item>
-        <item>2022-blake3-aes-128-gcm</item>
-        <item>2022-blake3-aes-256-gcm</item>
-        <item>2022-blake3-chacha20-poly1305</item>
-        <item>rc4-md5</item>
-        <item>aes-128-cfb</item>
-        <item>aes-192-cfb</item>
-        <item>aes-256-cfb</item>
-        <item>aes-128-ctr</item>
-        <item>aes-192-ctr</item>
-        <item>aes-256-ctr</item>
-        <item>bf-cfb</item>
-        <item>camellia-128-cfb</item>
-        <item>camellia-192-cfb</item>
-        <item>camellia-256-cfb</item>
-    </string-array>
-
     <string-array name="bypass_private_route" translatable="false">
         <item>1.0.0.0/8</item>
         <item>2.0.0.0/7</item>
@@ -206,16 +156,5 @@
         <item>203.128.0.0/9</item>
         <item>204.0.0.0/6</item>
         <item>208.0.0.0/4</item>
-    </string-array>
-
-    <string-array name="service_modes">
-        <item>@string/service_mode_proxy</item>
-        <item>@string/service_mode_vpn</item>
-        <item>@string/service_mode_transproxy</item>
-    </string-array>
-    <string-array name="service_mode_values" translatable="false">
-        <item>proxy</item>
-        <item>vpn</item>
-        <item>transproxy</item>
     </string-array>
 </resources>

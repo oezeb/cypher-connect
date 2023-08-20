@@ -1,0 +1,17 @@
+<resources>
+    <string name="app_name">Cypher Connect</string>
+    <string name="not_connected">Not Connected</string>
+    <string name="connecting">Connecting...</string>
+    <string name="connected">Connected</string>
+    <string name="stopping">Stopping...</string>
+    <string name="tap_to_connect">Tap to connect</string>
+    <string name="current_ip">Current IP %s</string>
+
+    <!-- Add Units-->
+    <string name="admob_app_id">ca-app-pub-6093428284595418~6135747752</string>
+    <string name="admob_banner_id">ca-app-pub-6093428284595418/7486140832</string>
+
+<!--    &lt;!&ndash; Test Add Units&ndash;&gt;-->
+<!--    <string name="admob_app_id">ca-app-pub-3940256099942544~3347511713</string>-->
+<!--    <string name="admob_banner_id">ca-app-pub-3940256099942544/6300978111</string>-->
+</resources>

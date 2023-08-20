@@ -1,52 +1,69 @@
 package com.github.oezeb.cypher_connect
 
+import android.content.Intent
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.os.RemoteException
-import android.widget.ImageButton
-import android.widget.TextView
-import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
+import android.view.View
 import androidx.preference.PreferenceDataStore
+import com.github.oezeb.cypher_connect.design.Location
+import com.github.oezeb.cypher_connect.design.MainDesign
 import com.github.shadowsocks.Core
 import com.github.shadowsocks.aidl.IShadowsocksService
 import com.github.shadowsocks.aidl.ShadowsocksConnection
+import com.github.shadowsocks.aidl.TrafficStats
 import com.github.shadowsocks.bg.BaseService.State
-import com.github.shadowsocks.database.ProfileManager
 import com.github.shadowsocks.preference.DataStore
 import com.github.shadowsocks.preference.OnPreferenceDataStoreChangeListener
 import com.github.shadowsocks.utils.Key
-import com.google.android.gms.ads.AdRequest
-import com.google.android.gms.ads.AdSize
-import com.google.android.gms.ads.AdView
-import com.google.android.gms.ads.MobileAds
 import kotlin.concurrent.thread
 
-
-class MainActivity : AppCompatActivity(), ShadowsocksConnection.Callback,
+class MainActivity : MainDesign(), ShadowsocksConnection.Callback,
     OnPreferenceDataStoreChangeListener {
     companion object {
         var stateListener: ((state: State, profileName: String?) -> Unit)? = null
     }
 
+    private val locationManager = LocationManager(this)
+    private var currentLocation: Location = Location(null, "Best Location")
     private val connection = ShadowsocksConnection(true)
     private var state = State.Idle
+    private val handler = Handler(Looper.getMainLooper())
+
+    override val launchLocationListActivityIntent: Intent
+        get() = Intent(this, LocationListActivity::class.java)
+
+    override fun getCurrentIp(): String = currentIP() ?: "Error"
+
+    override fun onClickConnectButton(v: View) {
+        if (state == State.Connected) {
+            if (state.canStop) Core.stopService()
+            showStoppingStatePage()
+        } else if (state == State.Stopped || state == State.Idle) {
+            thread {
+                val (_, id) = locationManager.testLocation(currentLocation.code)
+                Core.switchProfile(id)
+                Core.startService()
+            }
+            showConnectingStatePage()
+        }
+    }
+
+    override fun onLocationChanged(location: Location) {
+        currentLocation = location
+        if (state == State.Connected) {
+            thread {
+                val (_, id) = locationManager.testLocation(currentLocation.code)
+                Core.switchProfile(id)
+                Core.reloadService()
+            }
+            showConnectingStatePage()
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
-        val button =  findViewById<ImageButton>(R.id.connect_button).apply {
-            setOnClickListener { toggle() }
-        }
-        val stateView = findViewById<TextView>(R.id.state).apply { text = state.name }
-        val textView = findViewById<TextView>(R.id.text)
-
-        stateListener = {state, profileName ->
-            this.state = state
-
-            button.isEnabled = !(state == State.Connecting || state == State.Stopping)
-            if (profileName != null) textView.text = profileName
-            stateView.text = state.name
-        }
 
         try {
             connection.connect(this, this)
@@ -56,23 +73,14 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Callback,
         DataStore.publicStore.registerChangeListener(this)
         thread { syncProfiles() }
 
-        // Initialize the Mobile Ads SDK
-        MobileAds.initialize(this)
-        findViewById<AdView>(R.id.bannerAdView).apply { loadAd(AdRequest.Builder().build()) }
-        findViewById<AdView>(R.id.rectangleAdView).apply { loadAd(AdRequest.Builder().build()) }
-    }
-
-    private fun toggle() {
-        if (state.canStop) Core.stopService()
-        else {
-            changeState(State.Connecting)
-            thread {
-                val profiles = ProfileManager.getActiveProfiles() ?: emptyList()
-                val delayArray = testProfiles(profiles)
-                val minIndex = delayArray.indexOf(delayArray.min())
-                if (minIndex != -1) {
-                    switchProfile(profiles[minIndex].id)
-                    Core.startService()
+        setCurrentLocation(currentLocation)
+        stateListener = {state, _ ->
+            handler.post {
+                when (state) {
+                    State.Connecting -> showConnectingStatePage()
+                    State.Connected -> showConnectedStatePage()
+                    State.Stopping -> showStoppingStatePage()
+                    else -> showNotConnectedStatePage()
                 }
             }
         }
@@ -92,10 +100,11 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Callback,
         State.Idle
     })
 
-    private fun switchProfile(id: Long) {
-        Core.switchProfile(id)
-        if (state == State.Connected) {
-            Core.reloadService()
+    override fun trafficUpdated(profileId: Long, stats: TrafficStats) {
+        if (state != State.Stopping) {
+            if (profileId != 0L) {
+                updateTraffic(stats.txRate, stats.rxRate)
+            }
         }
     }
 

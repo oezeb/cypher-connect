@@ -1,1 +1,1 @@
-include(":core", ":plugin", ":obfs_local", ":app")
+include(":core", ":plugin", ":obfs_local", ":design", ":app")

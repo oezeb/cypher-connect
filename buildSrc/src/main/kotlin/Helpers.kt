@@ -112,6 +112,7 @@ fun Project.setupApp() {
 
     dependencies.add("implementation", project(":core"))
     dependencies.add("implementation", project(":obfs_local"))
+    dependencies.add("implementation", project(":design"))
 
     if (currentFlavor == "release") (android as AbstractAppExtension).applicationVariants.all {
         for (output in outputs) {
