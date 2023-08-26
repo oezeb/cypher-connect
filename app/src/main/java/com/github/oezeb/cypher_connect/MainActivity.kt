@@ -34,7 +34,7 @@ class MainActivity : MainDesign(), ShadowsocksConnection.Callback,
     override val launchLocationListActivityIntent: Intent
         get() = Intent(this, LocationListActivity::class.java)
 
-    override fun getCurrentIp(): String = currentIP() ?: "Error"
+    override fun getCurrentIp(): String = currentIP(this) ?: "Error"
 
     override fun onClickConnectButton(v: View) {
         if (state == State.Connected) {
@@ -71,7 +71,7 @@ class MainActivity : MainDesign(), ShadowsocksConnection.Callback,
             e.printStackTrace()
         }
         DataStore.publicStore.registerChangeListener(this)
-        thread { syncProfiles() }
+        thread { syncProfiles(this) }
 
         setCurrentLocation(currentLocation)
         stateListener = {state, _ ->

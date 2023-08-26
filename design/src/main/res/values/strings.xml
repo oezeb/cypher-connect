@@ -6,6 +6,10 @@
     <string name="stopping">Stopping...</string>
     <string name="tap_to_connect">Tap to connect</string>
     <string name="current_ip">Current IP %s</string>
+    
+    <!-- Get country codes and flags from https://flagpedia.net -->
+    <string name="flag_url">https://flagcdn.com/w40/%s.png</string>
+    <string name="country_codes_url">https://flagcdn.com/en/codes.json</string>
 
     <!-- Add Units-->
     <string name="admob_app_id">ca-app-pub-6093428284595418~6135747752</string>

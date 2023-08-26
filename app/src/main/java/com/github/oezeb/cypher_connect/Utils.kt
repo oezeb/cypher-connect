@@ -1,7 +1,6 @@
 package com.github.oezeb.cypher_connect
 
 import android.content.Context
-import android.util.Log
 import com.github.oezeb.cypher_connect.design.FlagCDN
 import com.github.oezeb.cypher_connect.design.Location
 import com.github.shadowsocks.database.Profile
@@ -11,14 +10,26 @@ import java.net.InetSocketAddress
 import java.net.Socket
 import java.net.URL
 import java.util.concurrent.atomic.AtomicIntegerArray
-import java.util.concurrent.atomic.AtomicLongArray
 import kotlin.concurrent.thread
 import kotlin.system.measureTimeMillis
 
-const val profilesURL = "https://gitee.com/oezeb/cypher-connect/raw/master/proxies.txt"
+/**
+ * Given an array of urls, return the content of the first one that is reachable
+ */
+fun fetch(urls: Array<String>): String? {
+    for(url in urls) {
+        try { return URL(url).readText() } catch (e: Exception) { }
+    }
+    return null
+}
 
-fun syncProfiles() {
-    val text = URL(profilesURL).readText()
+
+fun syncProfiles(context: Context) {
+    val text = fetch(context.resources.getStringArray(R.array.proxies_url))
+    if (text == null) {
+        Timber.e("Failed to fetch proxies")
+        return
+    }
 
     val fetched = Profile.findAllUrls(text)
     val locale = ProfileManager.getAllProfiles() ?: emptyList()
@@ -81,22 +92,9 @@ fun testProfiles(profiles: List<Profile>): List<Int> {
     return (0 until delayArray.length()).map { delayArray[it] }
 }
 
-fun currentIP(): String? {
-    val currentIPProviders = listOf(
-        "https://ipinfo.io/ip",
-        "https://api.ipify.org",
-        "https://icanhazip.com",
-        "https://ipecho.net/plain",
-        "https://indent.me",
-    )
-
-    for (url in currentIPProviders) {
-        try { return URL(url).readText() }
-        catch (e: Exception) { Log.d("Current IP", "url", e) }
-    }
-    return null
+fun currentIP(context: Context): String? {
+    return fetch(context.resources.getStringArray(R.array.current_ip_providers))
 }
-
 
 class LocationManager(private val context: Context)  {
     private val flagCDN = FlagCDN(context)

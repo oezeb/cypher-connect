@@ -28,33 +28,16 @@ fun TextView.setDrawableEnd(drawable: Int) = setDrawableEnd(context.getDrawable(
  * https://flagpedia.net
  */
 class FlagCDN(private val context: Context) {
-    companion object {
-        const val CODES_URL = "https://flagcdn.com/en/codes.json"
-        const val FLAG_WIDTH = 40
-
-        fun getFlagUrl(code: String): String = "https://flagcdn.com/w${FLAG_WIDTH}/${code}.png"
-
-        fun getFlagEmoji(countryCode: String): String {
-            return countryCode
-                .uppercase()
-                .split("")
-                .filter { it.isNotBlank() }
-                .map { it.codePointAt(0) + 0x1F1A5 }
-                .joinToString("") { String(Character.toChars(it)) }
-        }
-    }
-
     fun getCodes(): Map<String, *> {
         val filename = "codes.json"
-        val path = File(context.getExternalFilesDir(null), "Download")
-        if (!path.exists()) path.mkdirs()
-        val file = File(path, filename)
+        val file = File(context.cacheDir, filename)
         return if (file.exists()) {
             val data = file.readText()
             JSONObject(data).toMap()
         } else {
             file.createNewFile()
-            val data = URL(CODES_URL).readText()
+            val url = context.getString(R.string.country_codes_url)
+            val data = URL(url).readText()
             file.writeText(data)
             JSONObject(data).toMap()
         }
@@ -62,9 +45,9 @@ class FlagCDN(private val context: Context) {
 
     fun getFlag(countryCode: String): Drawable? {
         val code = countryCode.lowercase()
-        val url = getFlagUrl(code)
+        val url = context.getString(R.string.flag_url, countryCode)
         val filename = "${code}.png"
-        val path = File(context.cacheDir, "flags/w${FLAG_WIDTH}")
+        val path = File(context.cacheDir, "flags")
         if (!path.exists()) path.mkdirs()
         val file = File(path, filename)
 

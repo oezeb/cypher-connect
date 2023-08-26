@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="proxies_url" translatable="false">
+        <item>https://oezeb.github.io/cypher-connect/proxies.txt</item>
+        <item>https://gitee.com/oezeb/cypher-connect/raw/master/proxies.txt</item>
+    </string-array>
+    <string-array name="current_ip_providers" translatable="false">
+        <item>https://ipinfo.io/ip</item>
+        <item>https://api.ipify.org</item>
+        <item>https://icanhazip.com</item>
+        <item>https://ipecho.net/plain</item>
+        <item>https://indent.me</item>
+    </string-array>
+</resources>
