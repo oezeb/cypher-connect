@@ -16,7 +16,7 @@ jobs:
       # Change or comment out this line for automatic workflow on forks
       if: github.repository == 'oezeb/cypher-connect'
       run: |
-        echo "$(date -u) Updating proxies (cron job)" >> .github/workflows/update.log
+        echo "$(date -u) Updating proxies (cron job)" >> workflow.log
         python3 .github/workflows/update_proxies.py
     - name: Commit and Push
       # Condition to prevent unintended automatic workflow

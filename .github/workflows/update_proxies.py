@@ -8,7 +8,7 @@ import yaml
 
 CONFIG_URL = "https://raw.githubusercontent.com/WilliamStar007/ClashX-V2Ray-TopFreeProxy/main/combine/clash.config.yaml"
 IP_API = "http://ip-api.com/json"
-LOG_FILE = ".github/workflows/update.log"
+LOG_FILE = "workflow.log"
 
 def get(url):
     try:
