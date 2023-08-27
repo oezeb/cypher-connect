@@ -1,1 +1,7 @@
 Sat Aug 26 20:17:40 UTC 2023 Updating proxies (cron job)
+Sun Aug 27 00:28:53 UTC 2023 Updating proxies (cron job)
+2023-08-27 00:29:10.403883 Error getting http://ip-api.com/json/500.sayitfree.website?fields=status,countryCode: HTTPConnectionPool(host='ip-api.com', port=80): Read timed out. (read timeout=10)
+2023-08-27 00:29:20.423402 Error getting http://ip-api.com/json/18.141.181.186?fields=status,countryCode: HTTPConnectionPool(host='ip-api.com', port=80): Read timed out. (read timeout=10)
+2023-08-27 00:29:30.442189 Error getting http://ip-api.com/json/213.183.51.172?fields=status,countryCode: HTTPConnectionPool(host='ip-api.com', port=80): Read timed out. (read timeout=10)
+2023-08-27 00:29:40.461718 Error getting http://ip-api.com/json/38.121.43.71?fields=status,countryCode: HTTPConnectionPool(host='ip-api.com', port=80): Read timed out. (read timeout=10)
+2023-08-27 00:29:50.480452 Error getting http://ip-api.com/json/13.215.183.79?fields=status,countryCode: HTTPConnectionPool(host='ip-api.com', port=80): Read timed out. (read timeout=10)
