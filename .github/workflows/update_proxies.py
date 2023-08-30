@@ -1,43 +1,28 @@
 import base64
 import json
 import urllib.parse
-from datetime import datetime
 
 import requests
 import yaml
 
+
 CONFIG_URL = "https://raw.githubusercontent.com/WilliamStar007/ClashX-V2Ray-TopFreeProxy/main/combine/clash.config.yaml"
 IP_API = "http://ip-api.com/json"
-LOG_FILE = "workflow.log"
 
 def get(url):
+    print("GET", url)
     try:
         response = requests.get(url, timeout=10)
         if response.status_code == 200:
             return response.text
     except Exception as e:
-        with open(LOG_FILE, "a") as f:
-            f.write(f"{datetime.now()} Error getting {url}: {e}\n")
+        print(e)
     return None
 
 def config2url(config):
-    """
-    Config format:
-    ```
-    {
-        "name": "Proxy Name",
-        "type": "ss",
-        "server": "server",
-        "server_port": 1234,
-        "method": "cipher",
-        "password": "password",
-        "plugin": "obfs-local",
-        "plugin-opts": "obfs=tls;obfs-host=example.com"
-    }
-    ```
-    """
+    """Convert Shadowsocks config to URL"""
     userInfo = '%s:%s' % (config['method'], config['password'])
-    host = '%s:%d' % (config['server'], config['server_port'])
+    host = '%s:%s' % (config['server'], config['server_port'])
     plugin = None
     if 'plugin' in config:
         plugin = '%s;%s' % (config['plugin'], config['plugin_opts'])
@@ -54,6 +39,7 @@ def config2url(config):
         url += '#%s' % config['name']
     
     return url
+
 
 def main():
     content = get(CONFIG_URL)
