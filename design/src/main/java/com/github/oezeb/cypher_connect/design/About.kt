@@ -6,6 +6,9 @@ import android.view.View
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.text.HtmlCompat
+import com.google.android.gms.ads.AdRequest
+import com.google.android.gms.ads.AdView
+import com.google.android.gms.ads.MobileAds
 
 class About : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -19,6 +22,10 @@ class About : AppCompatActivity() {
         }
 
         findViewById<TextView>(R.id.title).apply { text = getString(R.string.about) }
+
+        // Initialize the Mobile Ads SDK
+        MobileAds.initialize(this)
+        findViewById<AdView>(R.id.bannerAdView).apply { loadAd(AdRequest.Builder().build()) }
     }
 
     fun back(view: View) = finish()
