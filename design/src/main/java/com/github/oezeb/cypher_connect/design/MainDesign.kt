@@ -6,7 +6,6 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import android.util.Log
 import android.view.View
 import android.widget.ImageButton
 import android.widget.TextView
@@ -73,7 +72,6 @@ abstract class MainDesign: AppCompatActivity() {
             onClickConnectButton(it)
         }
         currentLocationButton.setOnClickListener {
-            Log.d("MainDesign", "currentLocationButton click")
             startLocationListActivity.launch(launchLocationListActivityIntent)
         }
 
@@ -237,4 +235,6 @@ abstract class MainDesign: AppCompatActivity() {
         // Remove any pending callbacks when the activity is destroyed
         handler.removeCallbacksAndMessages(null)
     }
+
+    fun showAbout(view: View) = startActivity(Intent(this, About::class.java))
 }

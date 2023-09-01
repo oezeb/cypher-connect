@@ -27,11 +27,11 @@
             app:layout_constraintTop_toTopOf="parent" />
 
         <ImageButton
-            android:id="@+id/info"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:background="@android:color/transparent"
             android:src="@drawable/info_circle"
+            android:onClick="showAbout"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
     </androidx.constraintlayout.widget.ConstraintLayout>
@@ -83,7 +83,7 @@
             android:text="@string/connected"
             android:textAllCaps="true"
             android:textSize="13sp"
-            android:textColor="@color/white"
+            android:textColor="@android:color/white"
             android:fontFamily="@font/poppins_medium"
             android:textAlignment="center"
             android:visibility="invisible"
@@ -148,7 +148,7 @@
             android:layout_height="wrap_content"
             android:layout_marginBottom="5dp"
             android:fontFamily="@font/poppins"
-            android:text="Select location"
+            android:text="@string/select_location"
             android:textAlignment="center"
             android:textColor="@android:color/white"
             android:textSize="16sp"

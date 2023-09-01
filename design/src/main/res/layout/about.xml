@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/color_primary"
+    tools:context=".About"
+    android:orientation="vertical">
+    <include
+        android:id="@+id/action_bar_back"
+        layout="@layout/action_bar_back" />
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:layout_marginHorizontal="10dp"
+        android:layout_marginTop="10dp"
+        android:orientation="vertical">
+        <TextView
+            android:id="@+id/about_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="16dp"
+            android:textColor="@android:color/white"
+            android:fontFamily="@font/poppins"
+            android:textIsSelectable="true" />
+    </ScrollView>
+    <com.google.android.gms.ads.AdView xmlns:ads="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/bannerAdView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        ads:adSize="FULL_BANNER"
+        ads:adUnitId="@string/admob_banner_id" />
+</LinearLayout>

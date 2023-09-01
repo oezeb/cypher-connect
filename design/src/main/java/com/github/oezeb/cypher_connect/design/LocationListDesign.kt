@@ -131,15 +131,15 @@ abstract class LocationListDesign : AppCompatActivity() {
             finish()
         }
 
-        findViewById<ImageButton>(R.id.back).apply {
-            setOnClickListener {
-                setResult(Activity.RESULT_CANCELED)
-                finish()
-            }
-        }
+        findViewById<TextView>(R.id.title).apply { text = getString(R.string.app_name) }
 
         // Initialize the Mobile Ads SDK
         MobileAds.initialize(this)
         findViewById<AdView>(R.id.bannerAdView).apply { loadAd(AdRequest.Builder().build()) }
+    }
+
+    fun back(view: View) {
+        setResult(Activity.RESULT_CANCELED)
+        finish()
     }
 }
