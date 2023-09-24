@@ -29,7 +29,7 @@ class MainActivity : MainDesign(), ShadowsocksConnection.Callback,
     private var currentLocation: Location = Location(null, "Best Location")
     private val connection = ShadowsocksConnection(true)
     private var state = State.Idle
-    private val handler = Handler(Looper.getMainLooper())
+    private val syncProfilesThread = thread(false) { syncProfiles(this) }
 
     override val launchLocationListActivityIntent: Intent
         get() = Intent(this, LocationListActivity::class.java)
@@ -38,15 +38,15 @@ class MainActivity : MainDesign(), ShadowsocksConnection.Callback,
 
     override fun onClickConnectButton(v: View) {
         if (state == State.Connected) {
-            if (state.canStop) Core.stopService()
             showStoppingStatePage()
+            if (state.canStop) Core.stopService()
         } else if (state == State.Stopped || state == State.Idle) {
+            showConnectingStatePage()
             thread {
                 val (_, id) = locationManager.testLocation(currentLocation.code)
                 Core.switchProfile(id)
                 Core.startService()
             }
-            showConnectingStatePage()
         }
     }
 
@@ -62,8 +62,20 @@ class MainActivity : MainDesign(), ShadowsocksConnection.Callback,
         }
     }
 
+    override fun launchLocationListActivity() {
+        showLoadingProgressBar()
+        thread {
+            if (syncProfilesThread.isAlive) syncProfilesThread.join()
+            Handler(Looper.getMainLooper()).post {
+                hideLoadingProgressBar()
+                super.launchLocationListActivity()
+            }
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        syncProfilesThread.start()
 
         try {
             connection.connect(this, this)
@@ -71,11 +83,10 @@ class MainActivity : MainDesign(), ShadowsocksConnection.Callback,
             e.printStackTrace()
         }
         DataStore.publicStore.registerChangeListener(this)
-        thread { syncProfiles(this) }
 
         setCurrentLocation(currentLocation)
         stateListener = {state, _ ->
-            handler.post {
+            Handler(Looper.getMainLooper()).post {
                 when (state) {
                     State.Connecting -> showConnectingStatePage()
                     State.Connected -> showConnectedStatePage()

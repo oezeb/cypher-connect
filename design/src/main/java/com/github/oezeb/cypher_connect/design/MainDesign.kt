@@ -7,6 +7,7 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.view.View
+import android.widget.FrameLayout
 import android.widget.ImageButton
 import android.widget.TextView
 import androidx.activity.result.contract.ActivityResultContracts
@@ -18,8 +19,6 @@ import com.google.android.gms.ads.MobileAds
 import kotlin.concurrent.thread
 
 abstract class MainDesign: AppCompatActivity() {
-    private lateinit var appName: TextView
-
     private lateinit var stateView1: TextView // Top
     private lateinit var stateView2: TextView // Center - On Button - All Caps
     private lateinit var stateView3: TextView // Below Button
@@ -33,6 +32,8 @@ abstract class MainDesign: AppCompatActivity() {
     private lateinit var trafficDown: TextView
     private lateinit var currentLocationButton: AppCompatButton
 
+    private lateinit var loadingProgressBar: FrameLayout
+
     private val startLocationListActivity = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
             val data: Intent? = result.data
@@ -44,7 +45,6 @@ abstract class MainDesign: AppCompatActivity() {
         }
     }
 
-
     abstract val launchLocationListActivityIntent: Intent
     abstract fun getCurrentIp(): String
     abstract fun onClickConnectButton(v: View): Unit
@@ -53,7 +53,6 @@ abstract class MainDesign: AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.main_design)
-        appName = findViewById(R.id.app_name)
 
         stateView1 = findViewById(R.id.state_text_1)
         stateView2 = findViewById(R.id.state_text_2)
@@ -68,12 +67,16 @@ abstract class MainDesign: AppCompatActivity() {
         trafficDown = findViewById(R.id.traffic_down)
         currentLocationButton = findViewById(R.id.current_location)
 
+        loadingProgressBar = findViewById(R.id.loading)
+
         connectButton.setOnClickListener {
             onClickConnectButton(it)
         }
         currentLocationButton.setOnClickListener {
-            startLocationListActivity.launch(launchLocationListActivityIntent)
+            launchLocationListActivity()
         }
+
+        findViewById<ImageButton>(R.id.leading).apply { visibility = View.GONE }
 
         showNotConnectedStatePage()
 
@@ -83,6 +86,10 @@ abstract class MainDesign: AppCompatActivity() {
     }
 
     private val handler = Handler(Looper.getMainLooper())
+
+    open fun launchLocationListActivity() {
+        startLocationListActivity.launch(launchLocationListActivityIntent)
+    }
 
     fun setCurrentLocation(location: Location) {
         thread {
@@ -112,6 +119,9 @@ abstract class MainDesign: AppCompatActivity() {
         startTimeMillis = System.currentTimeMillis()
         updateDuration()
     }
+
+    fun showLoadingProgressBar()  { loadingProgressBar.visibility = View.VISIBLE }
+    fun hideLoadingProgressBar() { loadingProgressBar.visibility = View.GONE }
 
     fun showConnectingStatePage() {
         hideViews(listOf(durationView, stateView2, currentIp, trafficUp, trafficDown))
@@ -236,5 +246,8 @@ abstract class MainDesign: AppCompatActivity() {
         handler.removeCallbacksAndMessages(null)
     }
 
+
     fun showAbout(view: View) = startActivity(Intent(this, About::class.java))
+    fun back(view: View) {}
+    fun onClickLoading(view: View) {}
 }

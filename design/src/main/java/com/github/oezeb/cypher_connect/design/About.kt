@@ -3,6 +3,7 @@ package com.github.oezeb.cypher_connect.design;
 import android.os.Bundle
 import android.text.method.LinkMovementMethod
 import android.view.View
+import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.text.HtmlCompat
@@ -22,6 +23,7 @@ class About : AppCompatActivity() {
         }
 
         findViewById<TextView>(R.id.title).apply { text = getString(R.string.about) }
+        findViewById<LinearLayout>(R.id.actions).apply { visibility = View.GONE }
 
         // Initialize the Mobile Ads SDK
         MobileAds.initialize(this)
@@ -29,4 +31,5 @@ class About : AppCompatActivity() {
     }
 
     fun back(view: View) = finish()
+    fun showAbout(view: View) {}
 }

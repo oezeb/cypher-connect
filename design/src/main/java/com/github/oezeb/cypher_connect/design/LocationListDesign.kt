@@ -5,11 +5,10 @@ import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import android.os.Parcelable
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageButton
+import android.widget.LinearLayout
 import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
@@ -20,11 +19,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.AdView
 import com.google.android.gms.ads.MobileAds
-import kotlinx.parcelize.Parcelize
 import kotlin.concurrent.thread
-
-@Parcelize
-data class Location(val code: String?=null, val name: String, var speed: Int?=null) : Parcelable
 
 abstract class LocationListDesign : AppCompatActivity() {
     companion object {
@@ -131,7 +126,7 @@ abstract class LocationListDesign : AppCompatActivity() {
             finish()
         }
 
-        findViewById<TextView>(R.id.title).apply { text = getString(R.string.app_name) }
+        findViewById<LinearLayout>(R.id.actions).apply { visibility = View.GONE }
 
         // Initialize the Mobile Ads SDK
         MobileAds.initialize(this)
@@ -142,4 +137,5 @@ abstract class LocationListDesign : AppCompatActivity() {
         setResult(Activity.RESULT_CANCELED)
         finish()
     }
+    fun showAbout(view: View) {}
 }
