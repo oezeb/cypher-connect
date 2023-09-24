@@ -67,7 +67,7 @@ fun syncProfiles(context: Context) {
 }
 
 
-const val TEST_TIME_OUT = 5000
+const val TEST_TIME_OUT = 1000
 /**
  * Test profiles and return the delay in milliseconds
  */
@@ -88,7 +88,7 @@ fun testProfiles(profiles: List<Profile>): List<Int> {
                 delayArray.addAndGet(index, Int.MAX_VALUE)
             }
         }
-    }.map { it.join() }
+    }.map { if (it.isAlive) it.join() }
     return (0 until delayArray.length()).map { delayArray[it] }
 }
 
