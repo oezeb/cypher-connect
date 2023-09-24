@@ -4,7 +4,7 @@ import urllib.parse
 
 import requests
 import yaml
-
+from collections import defaultdict
 
 CONFIG_URL = "https://raw.githubusercontent.com/WilliamStar007/ClashX-V2Ray-TopFreeProxy/main/combine/clash.config.yaml"
 IP_API = "http://ip-api.com/json"
@@ -48,13 +48,13 @@ def main():
     
     data = yaml.load(content, Loader=yaml.FullLoader)
     proxies = [proxy for proxy in data["proxies"] if proxy["type"] == "ss"]
-    text = ""
+    text, names = "", defaultdict(int)
     for proxy in proxies:
         print(proxy['name'])
         if 'plugin' in proxy and proxy['plugin'] != 'obfs':
             continue
 
-        url = f"{IP_API}/{proxy['server']}?fields=status,countryCode"
+        url = f"{IP_API}/{proxy['server']}?fields=status,countryCode,regionName"
         content = get(url)
         if content is None:
             continue
@@ -62,8 +62,15 @@ def main():
         data = json.loads(content)
         if data["status"] == "fail":
             continue
-        
-        proxy['name'] = data['countryCode']
+
+        name = data['countryCode']
+        if 'regionName' in data:
+            name += "-" + data['regionName']
+        names[name] += 1
+        if names[name] > 1:
+            name += " " + str(names[name])
+
+        proxy['name'] = name
         proxy['method'] = proxy.pop('cipher')
         proxy['server_port'] = proxy.pop('port')
         if 'plugin' in proxy:
