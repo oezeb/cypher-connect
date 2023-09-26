@@ -24,7 +24,7 @@ MAX_CONCURRENT = 25
 
 def test_proxies(proxies: list):
     # Write proxies to config file
-    filename = os.path.join(os.path.dirname(__file__), "clash.config.yaml")
+    filename =  "clash.config.yaml"
     with open(filename, "w") as f:
         yaml.dump({"proxies": proxies}, f)
     
@@ -33,14 +33,14 @@ def test_proxies(proxies: list):
     cmd = f"""
         docker run -d --rm --network host \
             --name {container} \
-            -v {filename}:{filename} \
+            -v {os.path.abspath(filename)}:/{filename} \
             dreamacro/clash \
             -ext-ctl {HOST}:{PORT} \
-            -f {filename}
+            -f /{filename}
     """
     res = subprocess.run(cmd, shell=True)
     if res.returncode != 0:
-        return
+        return []
 
     # # Test proxies
     q = Queue()
@@ -58,6 +58,9 @@ def test_proxies(proxies: list):
     # Stop clash
     cmd = f"docker stop {container}"
     subprocess.run(cmd, shell=True)
+
+    # Remove config file
+    os.remove(filename)
 
     # return results
     results = []
