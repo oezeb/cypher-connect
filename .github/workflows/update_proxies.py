@@ -1,12 +1,13 @@
 import base64
 import json
 import urllib.parse
+from collections import defaultdict
 
 import requests
 import yaml
-from collections import defaultdict
+from test_proxies import test_proxies
 
-CONFIG_URL = "https://raw.githubusercontent.com/WilliamStar007/ClashX-V2Ray-TopFreeProxy/main/combine/clash.config.yaml"
+CONFIG_URL = "https://raw.githubusercontent.com/oezeb/ClashX-V2Ray-TopFreeProxy/main/combine/clash.config.yaml"
 IP_API = "http://ip-api.com/json"
 
 def get(url):
@@ -40,7 +41,6 @@ def config2url(config):
     
     return url
 
-
 def main():
     content = get(CONFIG_URL)
     if content is None:
@@ -48,6 +48,9 @@ def main():
     
     data = yaml.load(content, Loader=yaml.FullLoader)
     proxies = [proxy for proxy in data["proxies"] if proxy["type"] == "ss"]
+    results = test_proxies(proxies)
+    proxies = [proxy['name'] for proxy, delay, _ in results if delay is not None]
+
     text, names = "", defaultdict(int)
     for proxy in proxies:
         print(proxy['name'])
