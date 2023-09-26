@@ -9,11 +9,11 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:background="@android:color/transparent"
+        android:onClick="back"
         android:src="@drawable/baseline_keyboard_arrow_left_36"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
-        android:onClick="back" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
     <TextView
         android:id="@+id/title"
         android:layout_width="wrap_content"
@@ -23,23 +23,23 @@
         android:textAlignment="center"
         android:textColor="@android:color/white"
         android:textSize="18sp"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent" />
+        app:layout_constraintTop_toTopOf="parent" />
     <LinearLayout
         android:id="@+id/actions"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:orientation="horizontal"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent">
+        app:layout_constraintTop_toTopOf="parent">
         <ImageButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:background="@android:color/transparent"
-            android:src="@drawable/info_circle"
-            android:onClick="showAbout" />
+            android:onClick="showAbout"
+            android:src="@drawable/info_circle" />
     </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

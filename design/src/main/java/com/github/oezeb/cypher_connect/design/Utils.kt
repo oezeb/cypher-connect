@@ -6,6 +6,7 @@ import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.os.Parcelable
 import android.util.DisplayMetrics
+import android.view.View
 import android.widget.TextView
 import kotlinx.parcelize.Parcelize
 import org.json.JSONArray
@@ -13,9 +14,16 @@ import org.json.JSONObject
 import java.io.File
 import java.net.URL
 
+@Parcelize
+data class Server(val id: Long, val name: String?, var speed: Int?=null): Parcelable
 
 @Parcelize
-data class Location(val code: String?=null, val name: String, var speed: Int?=null) : Parcelable
+data class Location(
+    val code: String?=null,
+    val name: String,
+    val servers: List<Server> = listOf(),
+    var speed: Int?=null,
+): Parcelable
 
 fun TextView.setDrawable(drawable: Drawable?, index: Int) {
     val all = compoundDrawablesRelative
@@ -73,6 +81,26 @@ class FlagCDN(private val context: Context) {
             null
         }
     }
+}
+
+val SPEED_ICONS = listOf(
+    R.drawable.cellular_connection,
+    R.drawable.cellular_connection_1,
+    R.drawable.cellular_connection_2,
+    R.drawable.cellular_connection_3,
+    R.drawable.cellular_connection_4
+)
+
+fun updateSpeed(view: View, speed: Int?) {
+    if (speed == null) return
+
+    val index = when {
+        speed < 0 -> 0
+        speed >= SPEED_ICONS.size -> SPEED_ICONS.size - 1
+        else -> speed
+    }
+
+    (view as TextView).setDrawableEnd(view.context.getDrawable(SPEED_ICONS[index]))
 }
 
 fun JSONObject.toMap(): Map<String, *> = keys().asSequence().associateWith {

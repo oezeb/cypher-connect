@@ -5,14 +5,10 @@ import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import android.widget.LinearLayout
 import android.widget.ProgressBar
-import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.widget.AppCompatButton
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -23,82 +19,40 @@ import kotlin.concurrent.thread
 
 abstract class LocationListDesign : AppCompatActivity() {
     companion object {
-        private val SPEED_ICONS = listOf(
-            R.drawable.cellular_connection,
-            R.drawable.cellular_connection_1,
-            R.drawable.cellular_connection_2,
-            R.drawable.cellular_connection_3,
-            R.drawable.cellular_connection_4
-        )
-
-        private fun updateSpeed(view: View, speed: Int?) {
-            if (speed == null) return
-
-            val index = when {
-                speed < 0 -> 0
-                speed >= SPEED_ICONS.size -> SPEED_ICONS.size - 1
-                else -> speed
-            }
-
-            (view as TextView).setDrawableEnd(view.context.getDrawable(SPEED_ICONS[index]))
-        }
-
         private val handler = Handler(Looper.getMainLooper())
     }
 
-    class ListAdapter(val dataSet: List<Location>) :
-        RecyclerView.Adapter<ListAdapter.ViewHolder>() {
-        companion object {
-            var onClickListener: ((v: View, item: Location) -> Unit)? = null
-        }
-        class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-            val button: AppCompatButton
-
-            init {
-                button = view as AppCompatButton
-            }
-        }
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-            val view = LayoutInflater.from(parent.context)
-                .inflate(R.layout.location_list_item, parent, false)
-            return ViewHolder(view)
-        }
-
-        override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-            val button = holder.button
-            val item = dataSet[position]
-
-            button.text = item.name
-            thread {
-                if (item.code != null) {
-                    val flag = FlagCDN(button.context).getFlag(item.code)
-                    handler.post { button.setDrawableStart(flag) }
-                }
-            }
-            thread {
-                handler.post { updateSpeed(button, item.speed) }
-            }
-            holder.button.setOnClickListener { onClickListener?.invoke(it, dataSet[position]) }
-        }
-
-        override fun getItemCount(): Int = dataSet.size
-    }
+    /**
+     * Return list of profiles' (id, name)
+     */
+    abstract fun getProfiles(): List<Pair<Long, String>>
 
     private lateinit var progressBar: ProgressBar
-    private lateinit var listView: RecyclerView
+    private lateinit var locationListView: RecyclerView
 
-    abstract fun getLocations(): List<Location>
-
-    fun updateSpeed(code: String, speed: Int) {
-        val adapter = listView.adapter as ListAdapter? ?: return
-
-        for (index in 0 until adapter.itemCount) {
-            if (adapter.dataSet[index].code == code) {
-                adapter.dataSet[index].speed = speed
-                adapter.notifyItemChanged(index)
+    private fun getLocations(): List<Location> {
+        val profiles = getProfiles()
+        val codeMap = FlagCDN(this).getCodes()
+        // each profile.name first two letters is the country code
+        val locations = profiles.groupBy { (_, name) -> name.substring(0, 2).lowercase() }
+            .filter { codeMap.containsKey(it.key) }
+            .map { (code, profiles) ->
+                val servers = profiles.map { (id, name) -> Server(id, name) }
+                Location(code, codeMap[code] as String, servers)
             }
-        }
+        return listOf(Location(null, "Best Location")) + locations
     }
+
+    private fun onClickItem(code: String?, id: Long) {
+        setResult(Activity.RESULT_OK, Intent().apply {
+            putExtra("code", code)
+            putExtra("id", id)
+        })
+        finish()
+    }
+
+    fun updateSpeed(id: Long, speed: Int?) =
+        (locationListView.adapter as LocationListAdapter?)?.updateSpeed(id, speed)
 
     fun setProgressBarVisible(isVisible: Boolean) {
         progressBar.isVisible = isVisible
@@ -108,23 +62,27 @@ abstract class LocationListDesign : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.location_list)
 
+        progressBar = findViewById(R.id.progress_bar)
+        locationListView = findViewById(R.id.recycle_view)
+        locationListView.layoutManager = LinearLayoutManager(this)
+        locationListView.adapter = LocationListAdapter(emptyList())
+
         thread {
             val locations = getLocations()
-            val adapter = ListAdapter(locations)
-            handler.post { listView.adapter = adapter }
+            val adapter = LocationListAdapter(locations)
+            handler.post { locationListView.adapter = adapter }
         }
 
-        progressBar = findViewById(R.id.progress_bar)
-        listView = findViewById(R.id.recycle_view)
-        listView.layoutManager = LinearLayoutManager(this)
-        listView.adapter = ListAdapter(emptyList())
-
-        ListAdapter.onClickListener = { _, item ->
-            val intent = Intent()
-            intent.putExtra("location", item)
-            setResult(Activity.RESULT_OK, intent)
-            finish()
+        ServerListAdapter.onClickListener = { _, item ->
+            onClickItem(item.name?.substring(0, 2)?.lowercase(), item.id)
         }
+
+        LocationListAdapter.onClickListener = { _, item ->
+            // return the server with the highest speed
+            val server = item.servers.maxByOrNull { it.speed ?: 0 }
+            onClickItem(item.code, server?.id ?: -1)
+        }
+
 
         findViewById<LinearLayout>(R.id.actions).apply { visibility = View.GONE }
 

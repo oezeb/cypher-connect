@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#999999" />
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/server_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@android:color/transparent"
+        android:drawablePadding="20dp"
+        android:fontFamily="@font/poppins"
+        android:text="United States"
+        android:textAlignment="textStart"
+        android:textAllCaps="false"
+        android:textColor="@android:color/white"
+        android:textSize="14sp" />
+</LinearLayout>

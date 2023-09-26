@@ -34,21 +34,30 @@ abstract class MainDesign: AppCompatActivity() {
 
     private lateinit var loadingProgressBar: FrameLayout
 
-    private val startLocationListActivity = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-        if (result.resultCode == Activity.RESULT_OK) {
-            val data: Intent? = result.data
-            val location = data?.getParcelableExtra<Location>("location")
-            if (location != null) {
-                setCurrentLocation(location)
-                onLocationChanged(location)
+    private val startLocationListActivity =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == Activity.RESULT_OK) {
+                result.data?.let {
+                    val code = it.getStringExtra("code")
+                    val id = it.getLongExtra("id", -1)
+
+                    val name = if (code == null) "Best Location" else {
+                        val codeMap = FlagCDN(this).getCodes()
+                        codeMap.getOrDefault(code, null) as String?
+                    }
+
+                    if (name != null) {
+                        setCurrentLocation(Location(code, name))
+                        onProfileChanged(id)
+                    }
+                }
             }
         }
-    }
 
     abstract val launchLocationListActivityIntent: Intent
     abstract fun getCurrentIp(): String
-    abstract fun onClickConnectButton(v: View): Unit
-    abstract fun onLocationChanged(location: Location): Unit
+    abstract fun onClickConnectButton(v: View)
+    abstract fun onProfileChanged(id: Long)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -65,7 +74,7 @@ abstract class MainDesign: AppCompatActivity() {
         selectLocationText = findViewById(R.id.select_location_text)
         trafficUp = findViewById(R.id.traffic_up)
         trafficDown = findViewById(R.id.traffic_down)
-        currentLocationButton = findViewById(R.id.current_location)
+        currentLocationButton = findViewById(R.id.location_button)
 
         loadingProgressBar = findViewById(R.id.loading)
 
@@ -77,7 +86,9 @@ abstract class MainDesign: AppCompatActivity() {
         }
 
         findViewById<ImageButton>(R.id.leading).apply { visibility = View.GONE }
+        findViewById<ImageButton>(R.id.expand_button).apply { visibility = View.GONE }
 
+        setCurrentLocation(Location(null, "Best Location"))
         showNotConnectedStatePage()
 
         // Initialize the Mobile Ads SDK
@@ -91,7 +102,7 @@ abstract class MainDesign: AppCompatActivity() {
         startLocationListActivity.launch(launchLocationListActivityIntent)
     }
 
-    fun setCurrentLocation(location: Location) {
+    private fun setCurrentLocation(location: Location) {
         thread {
             if (location.code != null) {
                 val flag = FlagCDN(this).getFlag(location.code)
@@ -243,9 +254,9 @@ abstract class MainDesign: AppCompatActivity() {
         super.onDestroy()
 
         // Remove any pending callbacks when the activity is destroyed
+        // specially the timer callbacks
         handler.removeCallbacksAndMessages(null)
     }
-
 
     fun showAbout(view: View) = startActivity(Intent(this, About::class.java))
     fun back(view: View) {}

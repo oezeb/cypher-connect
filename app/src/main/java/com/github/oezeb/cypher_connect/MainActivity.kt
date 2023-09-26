@@ -7,58 +7,81 @@ import android.os.Looper
 import android.os.RemoteException
 import android.view.View
 import androidx.preference.PreferenceDataStore
-import com.github.oezeb.cypher_connect.design.Location
 import com.github.oezeb.cypher_connect.design.MainDesign
 import com.github.shadowsocks.Core
 import com.github.shadowsocks.aidl.IShadowsocksService
 import com.github.shadowsocks.aidl.ShadowsocksConnection
 import com.github.shadowsocks.aidl.TrafficStats
 import com.github.shadowsocks.bg.BaseService.State
+import com.github.shadowsocks.database.Profile
+import com.github.shadowsocks.database.ProfileManager
 import com.github.shadowsocks.preference.DataStore
 import com.github.shadowsocks.preference.OnPreferenceDataStoreChangeListener
 import com.github.shadowsocks.utils.Key
+import timber.log.Timber
+import java.net.URL
 import kotlin.concurrent.thread
 
 class MainActivity : MainDesign(), ShadowsocksConnection.Callback,
     OnPreferenceDataStoreChangeListener {
     companion object {
         var stateListener: ((state: State, profileName: String?) -> Unit)? = null
+        const val MAX_CONCURRENT_TEST = 10
     }
 
-    private val locationManager = LocationManager(this)
-    private var currentLocation: Location = Location(null, "Best Location")
+    private fun getBestProfile(): Profile? {
+        val profiles = ProfileManager.getActiveProfiles() ?: emptyList()
+
+        val groups = profiles.chunked(MAX_CONCURRENT_TEST)
+        var best = Pair<Profile?, Int>(null, Int.MAX_VALUE)
+        for (group in groups) {
+            val delayArray = testProfiles(group)
+            val minDelayIndex = delayArray.indexOfFirst { it == delayArray.minOrNull() }
+            if (best.second > delayArray[minDelayIndex]) {
+                best = group[minDelayIndex] to delayArray[minDelayIndex]
+            }
+        }
+        return best.first
+    }
+
     private val connection = ShadowsocksConnection(true)
+    private var currentProfileId = -1L
     private var state = State.Idle
-    private val syncProfilesThread = thread(false) { syncProfiles(this) }
+    private val syncProfilesThread = thread(false) { syncProfiles() }
 
     override val launchLocationListActivityIntent: Intent
         get() = Intent(this, LocationListActivity::class.java)
 
-    override fun getCurrentIp(): String = currentIP(this) ?: "Error"
+    override fun getCurrentIp(): String {
+        for (url in resources.getStringArray(R.array.current_ip_providers)) {
+            try {
+                return URL(url).readText()
+            } catch (e: Exception) {
+                Timber.e(e)
+            }
+        }
+        return "Error"
+    }
 
     override fun onClickConnectButton(v: View) {
         if (state == State.Connected) {
-            showStoppingStatePage()
             if (state.canStop) Core.stopService()
         } else if (state == State.Stopped || state == State.Idle) {
-            showConnectingStatePage()
-            thread {
-                val (_, id) = locationManager.testLocation(currentLocation.code)
-                Core.switchProfile(id)
-                Core.startService()
+            if (currentProfileId < 0) {
+                val id = getBestProfile()?.id
+                Core.switchProfile(id ?: -1)
             }
+            Core.startService()
         }
     }
 
-    override fun onLocationChanged(location: Location) {
-        currentLocation = location
-        if (state == State.Connected) {
-            thread {
-                val (_, id) = locationManager.testLocation(currentLocation.code)
-                Core.switchProfile(id)
+    override fun onProfileChanged(id: Long) {
+        if (currentProfileId != id) {
+            currentProfileId = id
+            Core.switchProfile(id)
+            if (state == State.Connected) {
                 Core.reloadService()
             }
-            showConnectingStatePage()
         }
     }
 
@@ -84,7 +107,6 @@ class MainActivity : MainDesign(), ShadowsocksConnection.Callback,
         }
         DataStore.publicStore.registerChangeListener(this)
 
-        setCurrentLocation(currentLocation)
         stateListener = {state, _ ->
             Handler(Looper.getMainLooper()).post {
                 when (state) {
@@ -93,6 +115,19 @@ class MainActivity : MainDesign(), ShadowsocksConnection.Callback,
                     State.Stopping -> showStoppingStatePage()
                     else -> showNotConnectedStatePage()
                 }
+            }
+        }
+    }
+
+    private fun syncProfiles() {
+        for (url in resources.getStringArray(R.array.proxies_url)) {
+            try {
+                val text = URL(url).readText()
+                ProfileManager.getAllProfiles()?.forEach { ProfileManager.delProfile(it.id) }
+                Profile.findAllUrls(text).forEach { ProfileManager.createProfile(it) }
+                break
+            } catch (e: Exception) {
+                Timber.e(e)
             }
         }
     }
