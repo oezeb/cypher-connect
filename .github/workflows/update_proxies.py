@@ -49,7 +49,7 @@ def main():
     data = yaml.load(content, Loader=yaml.FullLoader)
     proxies = [proxy for proxy in data["proxies"] if proxy["type"] == "ss"]
     results = test_proxies(proxies)
-    proxies = [proxy['name'] for proxy, delay, _ in results if delay is not None]
+    proxies = [proxy for proxy, delay, _ in results if delay is not None]
 
     text, names = "", defaultdict(int)
     for proxy in proxies:
