@@ -68,9 +68,10 @@ def main():
             name += "-" + data['regionName']
         names[name] += 1
         if names[name] > 1:
-            name += " " + str(names[name])
+            sep = "-" if len(name) == 2 else " "
+            name += sep + str(names[name])
 
-        proxy['name'] = name
+        proxy['name'] = urllib.parse.quote(name)
         proxy['method'] = proxy.pop('cipher')
         proxy['server_port'] = proxy.pop('port')
         if 'plugin' in proxy:
