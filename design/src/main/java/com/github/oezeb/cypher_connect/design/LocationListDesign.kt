@@ -34,7 +34,7 @@ abstract class LocationListDesign : AppCompatActivity() {
         val profiles = getProfiles()
         val codeMap = FlagCDN(this).getCodes()
         // each profile.name first two letters is the country code
-        val locations = profiles.groupBy { (_, name) -> name.substring(0, 2).lowercase() }
+        val locations = profiles.groupBy { (_, name) -> if (name.length >= 2) name.substring(0, 2).lowercase() else "" }
             .filter { codeMap.containsKey(it.key) }
             .map { (code, profiles) ->
                 val servers = profiles.map { (id, name) -> Server(id, name) }

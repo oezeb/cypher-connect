@@ -50,9 +50,14 @@ class FlagCDN(private val context: Context) {
         } else {
             file.createNewFile()
             val url = context.getString(R.string.country_codes_url)
-            val data = URL(url).readText()
-            file.writeText(data)
-            JSONObject(data).toMap()
+            val res = Http.get(url, timeout = 1000)
+            if (res.ok) {
+                val data = res.text
+                file.writeText(data)
+                JSONObject(data).toMap()
+            } else {
+                mapOf<String, Any>()
+            }
         }
     }
 
@@ -72,9 +77,14 @@ class FlagCDN(private val context: Context) {
                 val data = file.readBytes()
                 BitmapFactory.decodeByteArray(data, 0, data.size, options)
             } else {
-                val data = URL(url).readBytes()
-                file.writeBytes(data)
-                BitmapFactory.decodeByteArray(data, 0, data.size, options)
+                val res = Http.get(url, timeout = 1000)
+                if (res.ok) {
+                    val data = res.bytes
+                    file.writeBytes(data)
+                    BitmapFactory.decodeByteArray(data, 0, data.size, options)
+                } else {
+                    null
+                }
             }
             BitmapDrawable(context.resources, bitmap)
         } catch (e: Exception) {
@@ -118,3 +128,43 @@ fun JSONArray.toList(): List<*> = (0 until length()).asSequence().map {
         else -> value
     }
 }.toList()
+
+
+class Http {
+    companion object {
+        data class Response(val code: Int, val bytes: ByteArray) {
+            val ok get() = code in 200..299
+            val text get() = String(bytes)
+            override fun equals(other: Any?): Boolean {
+                if (this === other) return true
+                if (javaClass != other?.javaClass) return false
+
+                other as Response
+
+                if (code != other.code) return false
+                if (!bytes.contentEquals(other.bytes)) return false
+
+                return true
+            }
+
+            override fun hashCode(): Int {
+                var result = code
+                result = 31 * result + bytes.contentHashCode()
+                return result
+            }
+        }
+
+        fun get(url: String, headers: Map<String, String>? = null, timeout: Int? = null): Response {
+            val connection = URL(url).openConnection() as java.net.HttpURLConnection
+            connection.requestMethod = "GET"
+            if (timeout != null) {
+                connection.connectTimeout = timeout
+                connection.readTimeout = timeout
+            }
+            headers?.forEach { connection.setRequestProperty(it.key, it.value) }
+            val code = connection.responseCode
+            val bytes = connection.inputStream.readBytes()
+            return Response(code, bytes)
+        }
+    }
+}
