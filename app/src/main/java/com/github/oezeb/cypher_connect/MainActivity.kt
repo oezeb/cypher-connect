@@ -1,6 +1,7 @@
 package com.github.oezeb.cypher_connect
 
 import android.content.Intent
+import android.net.VpnService
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -143,8 +144,12 @@ class MainActivity : MainDesign(), ShadowsocksConnection.Callback,
             handler.post {
                 when (state) {
                     State.Connecting -> showConnectingStatePage()
-                    State.Connected -> showConnectedStatePage()
+                    State.Connected -> { showConnectedStatePage(); showInterstitialAd() }
                     State.Stopping -> showStoppingStatePage()
+                    State.Stopped -> {
+                        showNotConnectedStatePage()
+                        if (VpnService.prepare(this) == null) showInterstitialAd()
+                    }
                     else -> showNotConnectedStatePage()
                 }
             }

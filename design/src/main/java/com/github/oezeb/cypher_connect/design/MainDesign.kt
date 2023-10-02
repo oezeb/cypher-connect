@@ -2,7 +2,6 @@ package com.github.oezeb.cypher_connect.design
 
 import android.app.Activity
 import android.content.Intent
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -11,12 +10,17 @@ import android.widget.FrameLayout
 import android.widget.ImageButton
 import android.widget.TextView
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.AppCompatButton
 import androidx.core.view.isVisible
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.AdView
+import com.google.android.gms.ads.LoadAdError
 import com.google.android.gms.ads.MobileAds
+import com.google.android.gms.ads.interstitial.InterstitialAd
+import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback
 import kotlin.concurrent.thread
+
 
 abstract class MainDesign: AppCompatActivity() {
     private lateinit var stateView1: TextView // Top
@@ -33,6 +37,9 @@ abstract class MainDesign: AppCompatActivity() {
     private lateinit var currentLocationButton: AppCompatButton
 
     private lateinit var loadingProgressBar: FrameLayout
+
+    private lateinit var adRequest: AdRequest
+    private var interstitialAd: InterstitialAd? = null
 
     private val startLocationListActivity =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
@@ -58,6 +65,9 @@ abstract class MainDesign: AppCompatActivity() {
     abstract fun getCurrentIp(): String
     abstract fun onClickConnectButton(v: View)
     abstract fun onProfileChanged(id: Long)
+    open fun launchLocationListActivity() {
+        startLocationListActivity.launch(launchLocationListActivityIntent)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -88,19 +98,17 @@ abstract class MainDesign: AppCompatActivity() {
         findViewById<ImageButton>(R.id.leading).apply { visibility = View.GONE }
         findViewById<ImageButton>(R.id.expand_button).apply { visibility = View.GONE }
 
-        setCurrentLocation(Location(null, "Best Location"))
+        setCurrentLocation(Location(null, getString(R.string.best_location)))
         showNotConnectedStatePage()
 
         // Initialize the Mobile Ads SDK
         MobileAds.initialize(this)
-        findViewById<AdView>(R.id.bannerAdView).apply { loadAd(AdRequest.Builder().build()) }
+        adRequest = AdRequest.Builder().build()
+        findViewById<AdView>(R.id.bannerAdView).apply { loadAd(adRequest) }
+        loadInterstitialAd()
     }
 
     private val handler = Handler(Looper.getMainLooper())
-
-    open fun launchLocationListActivity() {
-        startLocationListActivity.launch(launchLocationListActivityIntent)
-    }
 
     private fun setCurrentLocation(location: Location) {
         thread {
@@ -134,6 +142,21 @@ abstract class MainDesign: AppCompatActivity() {
     fun showLoadingProgressBar()  { loadingProgressBar.visibility = View.VISIBLE }
     fun hideLoadingProgressBar() { loadingProgressBar.visibility = View.GONE }
 
+    fun showInterstitialAd() {
+        interstitialAd?.show(this)
+        interstitialAd = null
+        loadInterstitialAd()
+    }
+
+    private fun loadInterstitialAd() {
+        InterstitialAd.load(this, getString(R.string.admob_interstitial_id), adRequest,
+            object : InterstitialAdLoadCallback() {
+                override fun onAdFailedToLoad(adError: LoadAdError) { interstitialAd = null }
+
+                override fun onAdLoaded(ad: InterstitialAd) { interstitialAd = ad }
+            })
+    }
+
     fun showConnectingStatePage() {
         hideViews(listOf(durationView, stateView2, currentIp, trafficUp, trafficDown))
         showViews(listOf(stateView1, stateView3, selectLocationText))
@@ -143,7 +166,7 @@ abstract class MainDesign: AppCompatActivity() {
         stateView3.setDrawableStart(R.drawable.icon_ionic_md_refresh)
 
         connectButton.setImageDrawable(getDrawable(R.drawable.ic_button_2))
-//        connectButton.isEnabled = false
+        connectButton.isEnabled = false
 
         selectLocationText.alpha = 0.2F
         currentLocationButton.alpha = 0.2F
@@ -176,7 +199,7 @@ abstract class MainDesign: AppCompatActivity() {
         stateView3.setDrawableStart(null)
 
         connectButton.setImageDrawable(getDrawable(R.drawable.ic_button))
-//        connectButton.isEnabled = false
+        connectButton.isEnabled = false
 
         selectLocationText.alpha = 0.2F
         currentLocationButton.alpha = 0.2F
