@@ -6,6 +6,7 @@ import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.os.Parcelable
 import android.util.DisplayMetrics
+import android.util.Log
 import android.view.View
 import android.widget.TextView
 import kotlinx.parcelize.Parcelize
@@ -44,21 +45,19 @@ class FlagCDN(private val context: Context) {
     fun getCodes(): Map<String, *> {
         val filename = "codes.json"
         val file = File(context.cacheDir, filename)
-        return if (file.exists()) {
-            val data = file.readText()
-            JSONObject(data).toMap()
-        } else {
-            file.createNewFile()
-            val url = context.getString(R.string.country_codes_url)
+        if (file.exists()) return JSONObject(file.readText()).toMap()
+
+        val url = context.getString(R.string.country_codes_url)
+        val data = try {
             val res = Http.get(url, timeout = 1000)
-            if (res.ok) {
-                val data = res.text
-                file.writeText(data)
-                JSONObject(data).toMap()
-            } else {
-                mapOf<String, Any>()
-            }
-        }
+            if (res.ok) res.text else null
+        } catch (e: Exception) {
+            null
+        } ?: return mapOf<String, Any>()
+
+        file.createNewFile()
+        file.writeText(data)
+        return JSONObject(data).toMap()
     }
 
     fun getFlag(countryCode: String): Drawable? {
