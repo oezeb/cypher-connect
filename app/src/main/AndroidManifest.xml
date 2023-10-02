@@ -22,6 +22,11 @@
         </activity>
 
         <activity android:name=".LocationListActivity" />
+        
+        <service
+            android:name=".ProfileSyncService"
+            android:enabled="true"
+            android:exported="false" />
     </application>
 
 </manifest>

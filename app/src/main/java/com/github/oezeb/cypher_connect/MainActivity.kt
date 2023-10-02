@@ -34,21 +34,23 @@ class MainActivity : MainDesign(), ShadowsocksConnection.Callback,
         val profiles = ProfileManager.getActiveProfiles() ?: emptyList()
 
         val groups = profiles.chunked(MAX_CONCURRENT_TEST)
-        var best = Pair<Profile?, Int>(null, Int.MAX_VALUE)
+        var profile = if (profiles.isNotEmpty()) profiles[0] else null
+        var minDelay = Int.MAX_VALUE
         for (group in groups) {
             val delayArray = testProfiles(group)
             val minDelayIndex = delayArray.indexOfFirst { it == delayArray.minOrNull() }
-            if (best.second > delayArray[minDelayIndex]) {
-                best = group[minDelayIndex] to delayArray[minDelayIndex]
+            if (delayArray[minDelayIndex] < minDelay) {
+                profile = group[minDelayIndex]
+                minDelay = delayArray[minDelayIndex]
             }
         }
-        return best.first
+
+        return profile
     }
 
     private val connection = ShadowsocksConnection(true)
     private var currentProfileId = -1L
     private var state = State.Idle
-    private val syncProfilesThread = thread(false) { syncProfiles() }
 
     private var bestProfile: Profile? = null
     private var bestProfileThread = thread(false) { bestProfile = getBestProfile() }
@@ -79,16 +81,7 @@ class MainActivity : MainDesign(), ShadowsocksConnection.Callback,
         if (state == State.Connected) {
             if (state.canStop) Core.stopService()
         } else if (state == State.Stopped || state == State.Idle) {
-            if (currentProfileId < 0) {
-                thread {
-                    handler.post { showLoadingProgressBar() }
-                    if (bestProfileThread.isAlive) bestProfileThread.join()
-                    bestProfile?.let {
-                        Core.switchProfile(it.id)
-                    }
-                    handler.post { hideLoadingProgressBar() }
-                }
-            }
+            onProfileChanged(currentProfileId)
             Core.startService()
         }
     }
@@ -114,24 +107,9 @@ class MainActivity : MainDesign(), ShadowsocksConnection.Callback,
         currentProfileId = id
     }
 
-    override fun launchLocationListActivity() {
-        showLoadingProgressBar()
-        thread {
-            if (syncProfilesThread.isAlive) syncProfilesThread.join()
-            handler.post {
-                hideLoadingProgressBar()
-                super.launchLocationListActivity()
-            }
-        }
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        syncProfilesThread.start()
-        thread {
-            syncProfilesThread.join()
-            bestProfileThread.start()
-        }
+        bestProfileThread.start()
 
         try {
             connection.connect(this, this)
@@ -154,20 +132,8 @@ class MainActivity : MainDesign(), ShadowsocksConnection.Callback,
                 }
             }
         }
-    }
 
-    private fun syncProfiles() {
-        for (url in resources.getStringArray(R.array.proxies_url)) {
-            try {
-                val res = Http.get(url, timeout = 1000)
-                val text = if (res.ok) res.text else ""
-                ProfileManager.getAllProfiles()?.forEach { ProfileManager.delProfile(it.id) }
-                Profile.findAllUrls(text).forEach { ProfileManager.createProfile(it) }
-                break
-            } catch (e: Exception) {
-                Timber.e(e)
-            }
-        }
+       startService(Intent(this, ProfileSyncService::class.java))
     }
 
     private fun changeState(state: State, profileName: String? = null) {
